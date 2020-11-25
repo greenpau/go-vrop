@@ -1,0 +1,178 @@
+{
+  "pageInfo": {
+    "totalCount": 2,
+    "page": 0,
+    "pageSize": 1
+  },
+  "links": [
+    {
+      "href": "/suite-api/api/resources?resourceKind=virtualmachine&amp;page=0&amp;pageSize=1",
+      "rel": "SELF",
+      "name": "current"
+    },
+    {
+      "href": "/suite-api/api/resources?resourceKind=virtualmachine&amp;page=1&amp;pageSize=1",
+      "rel": "NEXT",
+      "name": "next"
+    },
+    {
+      "href": "/suite-api/api/resources?resourceKind=virtualmachine&amp;page=0&amp;pageSize=1",
+      "rel": "RELATED",
+      "name": "first"
+    },
+    {
+      "href": "/suite-api/api/resources?resourceKind=virtualmachine&amp;page=1&amp;pageSize=1",
+      "rel": "RELATED",
+      "name": "last"
+    }
+  ],
+  "resourceList": [
+    {
+      "creationTime": 1542385754884,
+      "resourceKey": {
+        "name": "Server1",
+        "adapterKindKey": "VMWARE",
+        "resourceKindKey": "VirtualMachine",
+        "resourceIdentifiers": [
+          {
+            "identifierType": {
+              "name": "VMEntityInstanceUUID",
+              "dataType": "STRING",
+              "isPartOfUniqueness": false
+            },
+            "value": "0a6d5d32-761f-444e-b0bd-88f1b23688fd"
+          },
+          {
+            "identifierType": {
+              "name": "VMEntityName",
+              "dataType": "STRING",
+              "isPartOfUniqueness": false
+            },
+            "value": "Server1"
+          },
+          {
+            "identifierType": {
+              "name": "VMEntityObjectID",
+              "dataType": "STRING",
+              "isPartOfUniqueness": true
+            },
+            "value": "vm-121"
+          },
+          {
+            "identifierType": {
+              "name": "VMEntityVCID",
+              "dataType": "STRING",
+              "isPartOfUniqueness": true
+            },
+            "value": "675a40fe-45f0-41c1-ab40-07f6974c4e80"
+          },
+          {
+            "identifierType": {
+              "name": "VMServiceMonitoringEnabled",
+              "dataType": "STRING",
+              "isPartOfUniqueness": false
+            },
+            "value": "false"
+          }
+        ]
+      },
+      "resourceStatusStates": [
+        {
+          "adapterInstanceId": "ef9b3fca-df28-4bdd-beb8-9bab7d6c5a0c",
+          "resourceStatus": "DATA_RECEIVING",
+          "resourceState": "STARTED",
+          "statusMessage": ""
+        }
+      ],
+      "resourceHealth": "GREEN",
+      "resourceHealthValue": 100,
+      "dtEnabled": true,
+      "badges": [
+        {
+          "type": "COMPLIANCE",
+          "color": "GREY",
+          "score": -1
+        },
+        {
+          "type": "EFFICIENCY",
+          "color": "GREEN",
+          "score": 100
+        },
+        {
+          "type": "CAPACITY_REMAINING",
+          "color": "GREEN",
+          "score": 42.923694977758856
+        },
+        {
+          "type": "RISK",
+          "color": "GREEN",
+          "score": 0
+        },
+        {
+          "type": "WORKLOAD",
+          "color": "GREEN",
+          "score": 42.30821847915649
+        },
+        {
+          "type": "TIME_REMAINING",
+          "color": "GREEN",
+          "score": 366
+        },
+        {
+          "type": "HEALTH",
+          "color": "GREEN",
+          "score": 100
+        }
+      ],
+      "relatedResources": [],
+      "links": [
+        {
+          "href": "/suite-api/api/resources/ddfdafd2-cb98-449d-8dd0-1a8e5f6a9308",
+          "rel": "SELF",
+          "name": "linkToSelf"
+        },
+        {
+          "href": "/suite-api/api/resources/ddfdafd2-cb98-449d-8dd0-1a8e5f6a9308/relationships",
+          "rel": "RELATED",
+          "name": "relationsOfResource"
+        },
+        {
+          "href": "/suite-api/api/resources/ddfdafd2-cb98-449d-8dd0-1a8e5f6a9308/properties",
+          "rel": "RELATED",
+          "name": "propertiesOfResource"
+        },
+        {
+          "href": "/suite-api/api/alerts?resourceId=ddfdafd2-cb98-449d-8dd0-1a8e5f6a9308",
+          "rel": "RELATED",
+          "name": "alertsOfResource"
+        },
+        {
+          "href": "/suite-api/api/symptoms?resourceId=ddfdafd2-cb98-449d-8dd0-1a8e5f6a9308",
+          "rel": "RELATED",
+          "name": "symptomsOfResource"
+        },
+        {
+          "href": "/suite-api/api/resources/ddfdafd2-cb98-449d-8dd0-1a8e5f6a9308/statkeys",
+          "rel": "RELATED",
+          "name": "statKeysOfResource"
+        },
+        {
+          "href": "/suite-api/api/resources/ddfdafd2-cb98-449d-8dd0-1a8e5f6a9308/stats/latest",
+          "rel": "RELATED",
+          "name": "latestStatsOfResource"
+        },
+        {
+          "href": "/suite-api/api/resources/ddfdafd2-cb98-449d-8dd0-1a8e5f6a9308/properties",
+          "rel": "RELATED",
+          "name": "latestPropertiesOfResource"
+        },
+        {
+          "href": "/suite-api/api/credentials/",
+          "rel": "RELATED",
+          "name": "credentialsOfResource"
+        }
+      ],
+      "identifier": "ddfdafd2-cb98-449d-8dd0-1a8e5f6a9308"
+    }
+  ]
+}

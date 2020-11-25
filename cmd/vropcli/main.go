@@ -50,13 +50,13 @@ func main() {
 	var isShowVersion bool
 	var configDir string
 	var configFile string
-	var host, username, password string
+	var host, username, secret string
 	var getVirtualMachines bool
 
 	flag.StringVar(&configFile, "config", "", "configuration file")
 	flag.StringVar(&host, "host", "", "vRealize Operations Manager Hostname")
 	flag.StringVar(&username, "username", "", "Username")
-	flag.StringVar(&password, "password", "", "Password")
+	flag.StringVar(&secret, "secret", "", "Secret")
 
 	flag.BoolVar(&getVirtualMachines, "get-virtual-machines", false, "Get virtual machines")
 
@@ -111,9 +111,9 @@ func main() {
 		}
 	}
 
-	if password == "" {
-		if v := viper.Get("password"); v != nil {
-			password = viper.Get("password").(string)
+	if secret == "" {
+		if v := viper.Get("secret"); v != nil {
+			secret = viper.Get("secret").(string)
 		}
 	}
 
@@ -130,9 +130,9 @@ func main() {
 			}
 		}
 
-		if password == "" {
-			if v := viper.Get("password"); v != nil {
-				password = viper.Get("password").(string)
+		if secret == "" {
+			if v := viper.Get("secret"); v != nil {
+				secret = viper.Get("secret").(string)
 			}
 		}
 	} else {
@@ -161,7 +161,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := cli.SetPassword(password); err != nil {
+	if err := cli.SetSecret(secret); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}

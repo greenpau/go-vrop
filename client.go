@@ -31,7 +31,7 @@ type Client struct {
 	port               int
 	protocol           string
 	username           string
-	secret             string
+	password           string
 	token              string
 	tokenExpiresAt     time.Time
 	validateServerCert bool
@@ -113,12 +113,12 @@ func (c *Client) SetUsername(s string) error {
 	return nil
 }
 
-// SetSecret sets API secret.
-func (c *Client) SetSecret(s string) error {
+// SetPassword sets API password.
+func (c *Client) SetPassword(s string) error {
 	if s == "" {
-		return fmt.Errorf("empty secret")
+		return fmt.Errorf("empty password")
 	}
-	c.secret = s
+	c.password = s
 	return nil
 }
 

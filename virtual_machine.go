@@ -17,12 +17,14 @@ package vrop
 import (
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"strconv"
-	//"go.uber.org/zap"
 )
 
 type VirtualMachineResourcesResponse struct {
-	ID string `json:"_id,omitempty"`
+	Page      *PageInfo   `json:"pageInfo,omitempty"`
+	Links     []*Link     `json:"links,omitempty"`
+	Resources []*Resource `json:"resourceList,omitempty"`
 }
 
 // VirtualMachine is a virtual machine.
@@ -38,7 +40,7 @@ func (c *Client) GetVirtualMachines(opts map[string]interface{}) ([]*VirtualMach
 	}
 
 	pageOffset := 0
-	pageSize := 1
+	pageSize := 100
 
 	params := make(map[string]string)
 	params["resourceKind"] = "virtualmachine"
@@ -55,6 +57,8 @@ func (c *Client) GetVirtualMachines(opts map[string]interface{}) ([]*VirtualMach
 	if err := json.Unmarshal(b, &resp); err != nil {
 		return machines, fmt.Errorf("failed unmarshalling response: %s", err)
 	}
+
+	c.log.Warn("XXXX", zap.Any("XXXX", resp))
 
 	//c.log.Warn("response", zap.Any("response", string(b)))
 	//if resp.Status != "success" {
@@ -89,62 +93,67 @@ func (c *VirtualMachine) UnmarshalJSON(b []byte) error {
 
 	return fmt.Errorf("XXX: %s", string(b))
 
-	/*
-		if _, exists := m["attributes"]; !exists {
-			return fmt.Errorf("failed to unpack VirtualMachine, attributes not found")
-		}
-
-		for k, v := range m["attributes"].(map[string]interface{}) {
-			switch k {
-			case "_id":
-				c.ID = v.(string)
-			case "device_id":
-				c.DeviceID = v.(string)
-			case "client_install_time":
-				c.InstallTimestamp = v.(float64)
-			case "client_version":
-				c.Version = v.(string)
-			case "users":
-				for _, u := range v.([]interface{}) {
-					usr := &User{}
-					if err := usr.load(u.(map[string]interface{})); err != nil {
-						return fmt.Errorf("failed to unpack VirtualMachine, %s attribute error: %s", k, err)
-					}
-					c.Users = append(c.Users, usr)
-				}
-			case "host_info":
-				hostInfo := &Host{}
-				if err := hostInfo.load(v.(map[string]interface{})); err != nil {
-					return fmt.Errorf("failed to unpack VirtualMachine, %s attribute error: %s", k, err)
-				}
-				c.HostInfo = hostInfo
-			case "last_event":
-				lastEvent := &Event{}
-				if err := lastEvent.load(v.(map[string]interface{})); err != nil {
-					return fmt.Errorf("failed to unpack VirtualMachine, %s attribute error: %s", k, err)
-				}
-				c.LastEvent = lastEvent
-			default:
-				return fmt.Errorf("failed to unpack VirtualMachine, unsupported attribute: %s, %v", k, v)
-			}
-		}
-	*/
-	return nil
+	// return nil
 }
 
 // UnmarshalJSON unpacks byte array into VirtualMachineResourcesResponse.
 func (c *VirtualMachineResourcesResponse) UnmarshalJSON(b []byte) error {
+	obj := "VirtualMachineResourcesResponse"
 	var requiredKeys = map[string]bool{
 		"resourceList": false,
 		"pageInfo":     false,
+		"links":        false,
 	}
+	var optionalKeys = map[string]bool{}
 	var m map[string]interface{}
 	if len(b) < 10 {
-		return fmt.Errorf("invalid VirtualMachineResourcesResponse data: %s", b)
+		return fmt.Errorf("invalid %s data: %s", obj, b)
 	}
 	if err := json.Unmarshal(b, &m); err != nil {
-		return fmt.Errorf("failed to unpack VirtualMachineResourcesResponse")
+		return fmt.Errorf("failed to unpack %s", obj)
 	}
 
-	return fmt.Errorf("YYY: %s", string(b))
+	for k := range m {
+		if _, exists := requiredKeys[k]; exists {
+			requiredKeys[k] = true
+			continue
+		}
+		if _, exists := optionalKeys[k]; exists {
+			optionalKeys[k] = true
+			continue
+		}
+		return fmt.Errorf("failed to unpack %s, found unsupported key: %s", obj, k)
+	}
+
+	for k, present := range requiredKeys {
+		if !present {
+			return fmt.Errorf("failed to unpack %s, required key not found: %s", obj, k)
+		}
+	}
+
+	if p, err := unpackPageInfo(m["pageInfo"]); err != nil {
+		return fmt.Errorf("failed to unpack %s pageInfo: %s", obj, err)
+	} else {
+		c.Page = p
+	}
+
+	for _, item := range m["links"].([]interface{}) {
+		if link, err := unpackLink(item); err != nil {
+			return fmt.Errorf("failed to unpack %s link: %s", obj, err)
+		} else {
+			c.Links = append(c.Links, link)
+		}
+	}
+
+	for _, item := range m["resourceList"].([]interface{}) {
+		if resource, err := unpackResource(item); err != nil {
+			return fmt.Errorf("failed to unpack %s resourceList: %s", obj, err)
+		} else {
+			c.Resources = append(c.Resources, resource)
+		}
+	}
+
+	//return fmt.Errorf("YYY: %s", string(b))
+	//return fmt.Errorf("YYY: %v", c.Resources[0])
+	return nil
 }

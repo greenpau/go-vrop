@@ -58,7 +58,7 @@ func (c *Client) authenticate() error {
 
 	data := map[string]string{
 		"username": c.username,
-		"password": c.secret,
+		"password": c.password,
 	}
 	payload, err := json.Marshal(data)
 	if err != nil {

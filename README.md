@@ -26,7 +26,7 @@ Next, set environment variables for vRealize API Token:
 ```bash
 export VROP_HOST=vrop
 export VROP_USERNAME=admin
-export VROP_SECRET=secret
+export VROP_PASSWORD=My@Password
 ```
 
 Alternatively, the settings could be passed in a configuration file. There are
@@ -39,7 +39,7 @@ two options:
 ---
 host: vrop
 username: admin
-secret: secret
+password: password
 ```
 
 The following command fetches virtual machines data from vRealize API:

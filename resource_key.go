@@ -42,19 +42,19 @@ func unpackResourceKey(m interface{}) (*ResourceKey, error) {
 			p.ResourceKindKey = v.(string)
 		case "resourceIdentifiers":
 			for _, item := range v.([]interface{}) {
-				if resourceID, err := unpackResourceIdentifier(item); err != nil {
+				resourceID, err := unpackResourceIdentifier(item)
+				if err != nil {
 					return nil, fmt.Errorf("failed to unpack %s resourceIdentifier: %s", k, err)
-				} else {
-					p.ResourceIdentifiers = append(p.ResourceIdentifiers, resourceID)
 				}
+				p.ResourceIdentifiers = append(p.ResourceIdentifiers, resourceID)
 			}
 		case "links":
 			for _, item := range v.([]interface{}) {
-				if link, err := unpackLink(item); err != nil {
+				link, err := unpackLink(item)
+				if err != nil {
 					return nil, fmt.Errorf("failed to unpack %s link: %s", k, err)
-				} else {
-					p.Links = append(p.Links, link)
 				}
+				p.Links = append(p.Links, link)
 			}
 		case "extension":
 			// TODO

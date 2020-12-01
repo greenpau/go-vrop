@@ -63,26 +63,26 @@ func unpackResource(m interface{}) (*Resource, error) {
 			nsecs := int64(((v.(float64) / 1000) - float64(secs)) * 1e9)
 			r.CreationTime = time.Unix(secs, nsecs)
 		case "resourceKey":
-			if s, err := unpackResourceKey(v.(interface{})); err != nil {
+			s, err := unpackResourceKey(v.(interface{}))
+			if err != nil {
 				return nil, fmt.Errorf("failed to unpack %s resourceKey: %s", k, err)
-			} else {
-				r.Key = s
 			}
+			r.Key = s
 		case "credentialInstanceId":
 			r.CredentialInstanceID = v.(string)
 		case "geoLocation":
-			if s, err := unpackGeoLocation(v.(interface{})); err != nil {
+			s, err := unpackGeoLocation(v.(interface{}))
+			if err != nil {
 				return nil, fmt.Errorf("failed to unpack %s geoLocation: %s", k, err)
-			} else {
-				r.GeoLocation = s
 			}
+			r.GeoLocation = s
 		case "resourceStatusStates":
 			for _, item := range v.([]interface{}) {
-				if s, err := unpackResourceStatusState(item); err != nil {
+				s, err := unpackResourceStatusState(item)
+				if err != nil {
 					return nil, fmt.Errorf("failed to unpack %s resourceStatusStates: %s", k, err)
-				} else {
-					r.StatusStates = append(r.StatusStates, s)
 				}
+				r.StatusStates = append(r.StatusStates, s)
 			}
 		case "resourceHealth":
 			r.Health = v.(string)
@@ -94,11 +94,11 @@ func unpackResource(m interface{}) (*Resource, error) {
 			r.MonitoringInterval = v.(float64)
 		case "badges":
 			for _, item := range v.([]interface{}) {
-				if badge, err := unpackBadge(item); err != nil {
+				badge, err := unpackBadge(item)
+				if err != nil {
 					return nil, fmt.Errorf("failed to unpack %s badge: %s", k, err)
-				} else {
-					r.Badges = append(r.Badges, badge)
 				}
+				r.Badges = append(r.Badges, badge)
 			}
 		case "relatedResources":
 			r.RelatedResources = v.([]interface{})
@@ -106,11 +106,11 @@ func unpackResource(m interface{}) (*Resource, error) {
 			r.Extension = v.(interface{})
 		case "links":
 			for _, item := range v.([]interface{}) {
-				if link, err := unpackLink(item); err != nil {
+				link, err := unpackLink(item)
+				if err != nil {
 					return nil, fmt.Errorf("failed to unpack %s link: %s", k, err)
-				} else {
-					r.Links = append(r.Links, link)
 				}
+				r.Links = append(r.Links, link)
 			}
 		default:
 			return nil, fmt.Errorf("map contains unsupported key: %s", k)

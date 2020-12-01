@@ -22,6 +22,7 @@ import (
 	"time"
 )
 
+// VirtualMachineResourcesResponse is a response with VirtualMachine resources.
 type VirtualMachineResourcesResponse struct {
 	Page      *PageInfo   `json:"pageInfo,omitempty"`
 	Links     []*Link     `json:"links,omitempty"`
@@ -39,6 +40,7 @@ type VirtualMachine struct {
 	VMServiceMonitoringEnabled bool      `json:vm_service_monitoring_enabled,omitempty"`
 	CreatedAt                  time.Time `json:created_at,omitempty"`
 	LastSeenAt                 time.Time `json:last_seen_at,omitempty"`
+	Errors                     []error   `json:errors,omitempty"`
 }
 
 // GetVirtualMachines returns a list of VirtualMachine instances.
@@ -49,7 +51,7 @@ func (c *Client) GetVirtualMachines(opts map[string]interface{}) ([]*VirtualMach
 	}
 
 	pageOffset := 0
-	pageSize := 100
+	pageSize := 10
 
 	for {
 		params := make(map[string]string)
@@ -61,7 +63,7 @@ func (c *Client) GetVirtualMachines(opts map[string]interface{}) ([]*VirtualMach
 			return machines, err
 		}
 
-		return machines, fmt.Errorf(string(b))
+		// return machines, fmt.Errorf(string(b))
 
 		resp := &VirtualMachineResourcesResponse{}
 		if err := json.Unmarshal(b, &resp); err != nil {
@@ -90,6 +92,10 @@ func (c *Client) GetVirtualMachines(opts map[string]interface{}) ([]*VirtualMach
 					}
 				}
 			}
+			if err := m.GetProperties(); err != nil {
+				m.Errors = append(m.Errors, err)
+
+			}
 			machines = append(machines, m)
 		}
 
@@ -97,33 +103,20 @@ func (c *Client) GetVirtualMachines(opts map[string]interface{}) ([]*VirtualMach
 			break
 		}
 		pageOffset++
+		// TODO: remove break
+		break
 	}
 
 	return machines, nil
 }
 
 // ToJSONString serializes VirtualMachine to a string.
-func (c *VirtualMachine) ToJSONString() (string, error) {
-	itemJSON, err := json.Marshal(c)
+func (m *VirtualMachine) ToJSONString() (string, error) {
+	itemJSON, err := json.Marshal(m)
 	if err != nil {
 		return "", fmt.Errorf("failed converting to json: %s", err)
 	}
 	return string(itemJSON), nil
-}
-
-// UnmarshalJSON unpacks byte array into VirtualMachine.
-func (c *VirtualMachine) UnmarshalJSON(b []byte) error {
-	var m map[string]interface{}
-	if len(b) < 10 {
-		return fmt.Errorf("invalid VirtualMachine data: %s", b)
-	}
-	if err := json.Unmarshal(b, &m); err != nil {
-		return fmt.Errorf("failed to unpack VirtualMachine")
-	}
-
-	return fmt.Errorf("XXX: %s", string(b))
-
-	// return nil
 }
 
 // UnmarshalJSON unpacks byte array into VirtualMachineResourcesResponse.
@@ -161,27 +154,32 @@ func (c *VirtualMachineResourcesResponse) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	if p, err := unpackPageInfo(m["pageInfo"]); err != nil {
+	p, err := unpackPageInfo(m["pageInfo"])
+	if err != nil {
 		return fmt.Errorf("failed to unpack %s pageInfo: %s", obj, err)
-	} else {
-		c.Page = p
 	}
+	c.Page = p
 
 	for _, item := range m["links"].([]interface{}) {
-		if link, err := unpackLink(item); err != nil {
+		link, err := unpackLink(item)
+		if err != nil {
 			return fmt.Errorf("failed to unpack %s link: %s", obj, err)
-		} else {
-			c.Links = append(c.Links, link)
 		}
+		c.Links = append(c.Links, link)
 	}
 
 	for _, item := range m["resourceList"].([]interface{}) {
-		if resource, err := unpackResource(item); err != nil {
+		resource, err := unpackResource(item)
+		if err != nil {
 			return fmt.Errorf("failed to unpack %s resourceList: %s", obj, err)
-		} else {
-			c.Resources = append(c.Resources, resource)
 		}
+		c.Resources = append(c.Resources, resource)
 	}
 
+	return nil
+}
+
+// GetProperties fetches latest properties of VirtualMachine.
+func (m *VirtualMachine) GetProperties() error {
 	return nil
 }

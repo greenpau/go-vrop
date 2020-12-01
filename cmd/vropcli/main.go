@@ -38,9 +38,9 @@ func init() {
 	app = versioned.NewPackageManager("vropcli")
 	app.Description = "vRealize API Client"
 	app.Documentation = "https://github.com/greenpau/go-vrop/"
-	app.SetVersion(appVersion, "1.0.0")
+	app.SetVersion(appVersion, "1.0.1")
 	app.SetGitBranch(gitBranch, "main")
-	app.SetGitCommit(gitCommit, "4768e50")
+	app.SetGitCommit(gitCommit, "a302f79")
 	app.SetBuildUser(buildUser, "")
 	app.SetBuildDate(buildDate, "")
 }

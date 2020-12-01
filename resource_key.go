@@ -14,7 +14,7 @@ type ResourceKey struct {
 	ResourceKindKey string `json:"resourceKindKey,omitempty"`
 	// A collection of Resource Identifiers. A Resource Identifier is a
 	// key-value pair that encapsulates the identity of the resource
-	ResourceIdentifiers []interface{} `json:"resourceIdentifiers,omitempty"`
+	ResourceIdentifiers []*ResourceIdentifier `json:"resourceIdentifiers,omitempty"`
 	// Set of useful links related to the current object.
 	Links []*Link `json:"links,omitempty"`
 	// Extension values that were added to the given object by third-party.
@@ -41,7 +41,13 @@ func unpackResourceKey(m interface{}) (*ResourceKey, error) {
 		case "resourceKindKey":
 			p.ResourceKindKey = v.(string)
 		case "resourceIdentifiers":
-			// TODO
+			for _, item := range v.([]interface{}) {
+				if resourceID, err := unpackResourceIdentifier(item); err != nil {
+					return nil, fmt.Errorf("failed to unpack %s resourceIdentifier: %s", k, err)
+				} else {
+					p.ResourceIdentifiers = append(p.ResourceIdentifiers, resourceID)
+				}
+			}
 		case "links":
 			for _, item := range v.([]interface{}) {
 				if link, err := unpackLink(item); err != nil {
@@ -50,7 +56,6 @@ func unpackResourceKey(m interface{}) (*ResourceKey, error) {
 					p.Links = append(p.Links, link)
 				}
 			}
-
 		case "extension":
 			// TODO
 		default:

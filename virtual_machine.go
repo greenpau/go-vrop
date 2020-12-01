@@ -17,8 +17,9 @@ package vrop
 import (
 	"encoding/json"
 	"fmt"
-	"go.uber.org/zap"
+	//"go.uber.org/zap"
 	"strconv"
+	"time"
 )
 
 type VirtualMachineResourcesResponse struct {
@@ -29,7 +30,15 @@ type VirtualMachineResourcesResponse struct {
 
 // VirtualMachine is a virtual machine.
 type VirtualMachine struct {
-	ID string `json:"_id,omitempty"`
+	ID                         string    `json:"id,omitempty"`
+	Name                       string    `json:"name,omitempty"`
+	VMEntityInstanceUUID       string    `json:vm_entity_instance_uuid,omitempty"`
+	VMEntityName               string    `json:vm_entity_name,omitempty"`
+	VMEntityObjectID           string    `json:vm_entity_object_id,omitempty"`
+	VMEntityVCID               string    `json:vm_entity_vcid,omitempty"`
+	VMServiceMonitoringEnabled bool      `json:vm_service_monitoring_enabled,omitempty"`
+	CreatedAt                  time.Time `json:created_at,omitempty"`
+	LastSeenAt                 time.Time `json:last_seen_at,omitempty"`
 }
 
 // GetVirtualMachines returns a list of VirtualMachine instances.
@@ -42,32 +51,53 @@ func (c *Client) GetVirtualMachines(opts map[string]interface{}) ([]*VirtualMach
 	pageOffset := 0
 	pageSize := 100
 
-	params := make(map[string]string)
-	params["resourceKind"] = "virtualmachine"
-	params["page"] = strconv.Itoa(pageOffset)
-	params["pageSize"] = strconv.Itoa(pageSize)
-	b, err := c.request("GET", "resources", params)
-	if err != nil {
-		return machines, err
+	for {
+		params := make(map[string]string)
+		params["resourceKind"] = "virtualmachine"
+		params["page"] = strconv.Itoa(pageOffset)
+		params["pageSize"] = strconv.Itoa(pageSize)
+		b, err := c.request("GET", "resources", params)
+		if err != nil {
+			return machines, err
+		}
+
+		return machines, fmt.Errorf(string(b))
+
+		resp := &VirtualMachineResourcesResponse{}
+		if err := json.Unmarshal(b, &resp); err != nil {
+			return machines, fmt.Errorf("failed unmarshalling response: %s", err)
+		}
+
+		for _, r := range resp.Resources {
+			m := &VirtualMachine{}
+			m.ID = r.ID
+			m.CreatedAt = r.CreationTime
+			m.LastSeenAt = time.Now().UTC()
+			m.Name = r.Key.Name
+			for _, entry := range r.Key.ResourceIdentifiers {
+				switch entry.Key {
+				case "VMEntityInstanceUUID":
+					m.VMEntityInstanceUUID = entry.Value
+				case "VMEntityName":
+					m.VMEntityName = entry.Value
+				case "VMEntityObjectID":
+					m.VMEntityObjectID = entry.Value
+				case "VMEntityVCID":
+					m.VMEntityVCID = entry.Value
+				case "VMServiceMonitoringEnabled":
+					if entry.Value == "true" || entry.Value == "True" || entry.Value == "TRUE" {
+						m.VMServiceMonitoringEnabled = true
+					}
+				}
+			}
+			machines = append(machines, m)
+		}
+
+		if len(resp.Resources) < pageSize {
+			break
+		}
+		pageOffset++
 	}
-
-	//return machines, fmt.Errorf(string(b))
-
-	resp := &VirtualMachineResourcesResponse{}
-	if err := json.Unmarshal(b, &resp); err != nil {
-		return machines, fmt.Errorf("failed unmarshalling response: %s", err)
-	}
-
-	c.log.Warn("XXXX", zap.Any("XXXX", resp))
-
-	//c.log.Warn("response", zap.Any("response", string(b)))
-	//if resp.Status != "success" {
-	//	return machines, fmt.Errorf("failed request: %s", resp.Message)
-	//}
-	//for _, machine := range resp.VirtualMachines {
-	//c.log.Warn("machine", zap.Any("machine", machine))
-	//	machines = append(machines, machine)
-	//}
 
 	return machines, nil
 }
@@ -153,7 +183,5 @@ func (c *VirtualMachineResourcesResponse) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	//return fmt.Errorf("YYY: %s", string(b))
-	//return fmt.Errorf("YYY: %v", c.Resources[0])
 	return nil
 }

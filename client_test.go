@@ -23,6 +23,8 @@ import (
 
 func TestClient(t *testing.T) {
 	timerStartTime := time.Now()
+	username := "admin"
+	password := "password123"
 	token := "8c5e8866-0062-4059-b2be-92707e4374da"
 
 	// Create a client instance
@@ -54,7 +56,8 @@ func TestClient(t *testing.T) {
 	cli.SetHost(server.NonTLS.Hostname)
 	cli.SetPort(server.NonTLS.Port)
 	cli.SetProtocol(server.NonTLS.Protocol)
-	cli.SetToken(token)
+	cli.SetUsername(username)
+	cli.SetPassword(password)
 	if err := cli.SetValidateServerCertificate(); err != nil {
 		t.Fatalf("expected success, but failed")
 	}

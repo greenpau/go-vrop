@@ -31,16 +31,17 @@ type VirtualMachineResourcesResponse struct {
 
 // VirtualMachine is a virtual machine.
 type VirtualMachine struct {
-	ID                         string    `json:"id,omitempty"`
-	Name                       string    `json:"name,omitempty"`
-	VMEntityInstanceUUID       string    `json:vm_entity_instance_uuid,omitempty"`
-	VMEntityName               string    `json:vm_entity_name,omitempty"`
-	VMEntityObjectID           string    `json:vm_entity_object_id,omitempty"`
-	VMEntityVCID               string    `json:vm_entity_vcid,omitempty"`
-	VMServiceMonitoringEnabled bool      `json:vm_service_monitoring_enabled,omitempty"`
-	CreatedAt                  time.Time `json:created_at,omitempty"`
-	LastSeenAt                 time.Time `json:last_seen_at,omitempty"`
-	Errors                     []error   `json:errors,omitempty"`
+	ID                         string            `json:"id,omitempty"`
+	Name                       string            `json:"name,omitempty"`
+	VMEntityInstanceUUID       string            `json:"vm_entity_instance_uuid,omitempty"`
+	VMEntityName               string            `json:"vm_entity_name,omitempty"`
+	VMEntityObjectID           string            `json:"vm_entity_object_id,omitempty"`
+	VMEntityVCID               string            `json:"vm_entity_vcid,omitempty"`
+	VMServiceMonitoringEnabled bool              `json:"vm_service_monitoring_enabled,omitempty"`
+	CreatedAt                  time.Time         `json:"created_at,omitempty"`
+	LastSeenAt                 time.Time         `json:"last_seen_at,omitempty"`
+	Properties                 map[string]string `json:"properties,omitempty"`
+	Errors                     []string          `json:"errors,omitempty"`
 }
 
 // GetVirtualMachines returns a list of VirtualMachine instances.
@@ -51,7 +52,7 @@ func (c *Client) GetVirtualMachines(opts map[string]interface{}) ([]*VirtualMach
 	}
 
 	pageOffset := 0
-	pageSize := 10
+	pageSize := 100
 
 	for {
 		params := make(map[string]string)
@@ -72,6 +73,7 @@ func (c *Client) GetVirtualMachines(opts map[string]interface{}) ([]*VirtualMach
 
 		for _, r := range resp.Resources {
 			m := &VirtualMachine{}
+			m.Properties = make(map[string]string)
 			m.ID = r.ID
 			m.CreatedAt = r.CreationTime
 			m.LastSeenAt = time.Now().UTC()
@@ -92,8 +94,8 @@ func (c *Client) GetVirtualMachines(opts map[string]interface{}) ([]*VirtualMach
 					}
 				}
 			}
-			if err := m.GetProperties(); err != nil {
-				m.Errors = append(m.Errors, err)
+			if err := m.GetProperties(c); err != nil {
+				m.Errors = append(m.Errors, err.Error())
 
 			}
 			machines = append(machines, m)
@@ -103,8 +105,6 @@ func (c *Client) GetVirtualMachines(opts map[string]interface{}) ([]*VirtualMach
 			break
 		}
 		pageOffset++
-		// TODO: remove break
-		break
 	}
 
 	return machines, nil
@@ -180,6 +180,39 @@ func (c *VirtualMachineResourcesResponse) UnmarshalJSON(b []byte) error {
 }
 
 // GetProperties fetches latest properties of VirtualMachine.
-func (m *VirtualMachine) GetProperties() error {
+func (m *VirtualMachine) GetProperties(c *Client) error {
+	params := make(map[string]string)
+	b, err := c.request("GET", "resources/"+m.ID+"/properties", params)
+	if err != nil {
+		return err
+	}
+
+	resp := make(map[string]interface{})
+	if err := json.Unmarshal(b, &resp); err != nil {
+		return fmt.Errorf("failed unmarshalling VirtualMachine GetProperties response: %s", err)
+	}
+
+	if v, exists := resp["resourceId"]; exists {
+		if v.(string) != m.ID {
+			return fmt.Errorf("failed unmarshalling VirtualMachine GetProperties response: resourceId mismatch %s (expected) vs. %s (received)", m.ID, v.(string))
+		}
+	} else {
+		return fmt.Errorf("failed unmarshalling VirtualMachine GetProperties response: resourceId not found")
+	}
+
+	if v, exists := resp["property"]; exists {
+		vm := v.([]interface{})
+		for _, vme := range vm {
+			entry := vme.(map[string]interface{})
+			if _, exists := entry["name"]; !exists {
+				continue
+			}
+			if _, exists := entry["value"]; !exists {
+				continue
+			}
+			m.Properties[entry["name"].(string)] = entry["value"].(string)
+		}
+	}
+
 	return nil
 }

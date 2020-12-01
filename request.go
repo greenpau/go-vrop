@@ -87,7 +87,7 @@ func (c *Client) request(method, svc string, params map[string]string) ([]byte, 
 		return nil, fmt.Errorf("non-EOF error at url %s: %s", reqURL, err)
 	}
 
-	//c.log.Debug("http response body", zap.String("body", string(body)))
+	// c.log.Debug("http response body", zap.String("body", string(body)))
 
 	switch res.StatusCode {
 	case 200:
